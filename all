@@ -1,0 +1,290 @@
+class Buffer {
+
+    int item;
+    boolean available = false;
+
+    // Produce item
+    synchronized void produce(int value) {
+
+        try {
+
+            // Wait if buffer is full
+            while (available) {
+                wait();
+            }
+
+            item = value;
+
+            System.out.println("Produced : " + item);
+
+            available = true;
+
+            // Notify consumer
+            notify();
+
+        } catch (InterruptedException e) {
+
+            System.out.println(e);
+        }
+    }
+
+    // Consume item
+    synchronized void consume() {
+
+        try {
+
+            // Wait if buffer is empty
+            while (!available) {
+                wait();
+            }
+
+            System.out.println("Consumed : " + item);
+
+            available = false;
+
+            // Notify producer
+            notify();
+
+        } catch (InterruptedException e) {
+
+            System.out.println(e);
+        }
+    }
+}
+
+// Producer Thread
+class Producer extends Thread {
+
+    Buffer b;
+
+    Producer(Buffer b) {
+        this.b = b;
+    }
+
+    public void run() {
+
+        for (int i = 1; i <= 5; i++) {
+
+            b.produce(i);
+
+            try {
+                Thread.sleep(1000);
+
+            } catch (InterruptedException e) {
+
+                System.out.println(e);
+            }
+        }
+    }
+}
+
+// Consumer Thread
+class Consumer extends Thread {
+
+    Buffer b;
+
+    Consumer(Buffer b) {
+        this.b = b;
+    }
+
+    public void run() {
+
+        for (int i = 1; i <= 5; i++) {
+
+            b.consume();
+
+            try {
+                Thread.sleep(1000);
+
+            } catch (InterruptedException e) {
+
+                System.out.println(e);
+            }
+        }
+    }
+}
+
+// Main Class
+public class ProducerConsumer {
+
+    public static void main(String[] args) {
+
+        Buffer b = new Buffer();
+
+        Producer p = new Producer(b);
+
+        Consumer c = new Consumer(b);
+
+        p.start();
+
+        c.start();
+    }
+}
+
+class PingThread extends Thread {
+
+    public void run() {
+
+        while (true) {
+
+            System.out.println("Ping");
+
+            try {
+
+                // Pause for 1 second
+                Thread.sleep(1000);
+
+            } catch (InterruptedException e) {
+
+                System.out.println(e);
+            }
+        }
+    }
+}
+
+
+
+class PongThread extends Thread {
+
+    public void run() {
+
+        while (true) {
+
+            System.out.println("PONG");
+
+            try {
+
+                // Pause for 1 second
+                Thread.sleep(1000);
+
+            } catch (InterruptedException e) {
+
+                System.out.println(e);
+            }
+        }
+    }
+}
+
+public class PingPong {
+
+    public static void main(String[] args) {
+
+        PingThread t1 = new PingThread();
+
+        PongThread t2 = new PongThread();
+
+        // Start both threads
+        t1.start();
+        t2.start();
+    }
+}
+
+
+
+
+import java.util.Scanner;
+
+class MaxThread extends Thread {
+
+    int arr[];
+    int max;
+
+    // Constructor
+    MaxThread(int arr[]) {
+        this.arr = arr;
+    }
+
+    // Thread task
+    public void run() {
+
+        max = arr[0];
+
+        for (int i = 1; i < arr.length; i++) {
+
+            if (arr[i] > max) {
+                max = arr[i];
+            }
+        }
+
+        System.out.println("Maximum Element = " + max);
+    }
+
+    // Getter Method
+    int getMax() {
+        return max;
+    }
+}
+
+class AvgThread extends Thread {
+
+    int arr[];
+    double avg;
+
+    // Constructor
+    AvgThread(int arr[]) {
+        this.arr = arr;
+    }
+
+    // Thread task
+    public void run() {
+
+        int sum = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+
+            sum += arr[i];
+        }
+
+        avg = (double) sum / arr.length;
+
+        System.out.println("Average = " + avg);
+    }
+
+    // Getter Method
+    double getAvg() {
+        return avg;
+    }
+}
+
+public class ArrayOperation {
+
+    public static void main(String[] args)
+            throws InterruptedException {
+
+        Scanner sc = new Scanner(System.in);
+
+        // Input array size
+        System.out.print("Enter size of array: ");
+        int n = sc.nextInt();
+
+        int arr[] = new int[n];
+
+        // Input array elements
+        System.out.println("Enter array elements:");
+
+        for (int i = 0; i < n; i++) {
+
+            arr[i] = sc.nextInt();
+        }
+
+        // Create threads
+        MaxThread t1 = new MaxThread(arr);
+
+        AvgThread t2 = new AvgThread(arr);
+
+        // Start threads
+        t1.start();
+        t2.start();
+
+        // Wait for threads to complete
+        t1.join();
+        t2.join();
+
+        // Parent thread calculation
+        double result = t1.getMax() / t2.getAvg();
+
+        System.out.println("(Max / Average) = " + result);
+
+        sc.close();
+    }
+}
