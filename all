@@ -1,58 +1,91 @@
-class Buffer {
+class Ping extends Thread {
 
-    int item;
-    boolean available = false;
+    public void run() {
 
-    // Produce item
-    synchronized void produce(int value) {
+        while (true) {
 
-        try {
+            System.out.println("Ping");
 
-            // Wait if buffer is full
-            while (available) {
-                wait();
+            try {
+                sleep(1000);
+            } catch (Exception e) {
             }
-
-            item = value;
-
-            System.out.println("Produced : " + item);
-
-            available = true;
-
-            // Notify consumer
-            notify();
-
-        } catch (InterruptedException e) {
-
-            System.out.println(e);
-        }
-    }
-
-    // Consume item
-    synchronized void consume() {
-
-        try {
-
-            // Wait if buffer is empty
-            while (!available) {
-                wait();
-            }
-
-            System.out.println("Consumed : " + item);
-
-            available = false;
-
-            // Notify producer
-            notify();
-
-        } catch (InterruptedException e) {
-
-            System.out.println(e);
         }
     }
 }
 
-// Producer Thread
+class Pong extends Thread {
+
+    public void run() {
+
+        while (true) {
+
+            System.out.println("PONG");
+
+            try {
+                sleep(1000);
+            } catch (Exception e) {
+            }
+        }
+    }
+}
+
+public class Main {
+
+    public static void main(String args[]) {
+
+        Ping p1 = new Ping();
+        Pong p2 = new Pong();
+
+        p1.start();
+        p2.start();
+    }
+}
+
+
+
+class Buffer {
+
+    int data;
+    boolean valueSet = false;
+
+    synchronized void produce(int value) {
+
+        while (valueSet) {
+
+            try {
+                wait();
+            } catch (Exception e) {
+            }
+        }
+
+        data = value;
+
+        System.out.println("Produced : " + data);
+
+        valueSet = true;
+
+        notify();
+    }
+
+    synchronized void consume() {
+
+        while (!valueSet) {
+
+            try {
+                wait();
+            } catch (Exception e) {
+            }
+        }
+
+        System.out.println("Consumed : " + data);
+
+        valueSet = false;
+
+        notify();
+    }
+}
+
 class Producer extends Thread {
 
     Buffer b;
@@ -63,22 +96,22 @@ class Producer extends Thread {
 
     public void run() {
 
-        for (int i = 1; i <= 5; i++) {
+        int i = 1;
+
+        while (true) {
 
             b.produce(i);
 
+            i++;
+
             try {
-                Thread.sleep(1000);
-
-            } catch (InterruptedException e) {
-
-                System.out.println(e);
+                sleep(1000);
+            } catch (Exception e) {
             }
         }
     }
 }
 
-// Consumer Thread
 class Consumer extends Thread {
 
     Buffer b;
@@ -89,96 +122,31 @@ class Consumer extends Thread {
 
     public void run() {
 
-        for (int i = 1; i <= 5; i++) {
+        while (true) {
 
             b.consume();
 
             try {
-                Thread.sleep(1000);
-
-            } catch (InterruptedException e) {
-
-                System.out.println(e);
+                sleep(1000);
+            } catch (Exception e) {
             }
         }
     }
 }
 
-// Main Class
-public class ProducerConsumer {
+public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String args[]) {
 
         Buffer b = new Buffer();
 
         Producer p = new Producer(b);
-
         Consumer c = new Consumer(b);
 
         p.start();
-
         c.start();
     }
 }
-
-class PingThread extends Thread {
-
-    public void run() {
-
-        while (true) {
-
-            System.out.println("Ping");
-
-            try {
-
-                // Pause for 1 second
-                Thread.sleep(1000);
-
-            } catch (InterruptedException e) {
-
-                System.out.println(e);
-            }
-        }
-    }
-}
-
-
-
-class PongThread extends Thread {
-
-    public void run() {
-
-        while (true) {
-
-            System.out.println("PONG");
-
-            try {
-
-                // Pause for 1 second
-                Thread.sleep(1000);
-
-            } catch (InterruptedException e) {
-
-                System.out.println(e);
-            }
-        }
-    }
-}
-
-public class PingPong {
-
-    public static void main(String[] args) {
-
-        PingThread t1 = new PingThread();
-
-        PongThread t2 = new PongThread();
-
-        // Start both threads
-        t1.start();
-        t2.start();
-    }
-}
-
 
 
 
@@ -189,12 +157,10 @@ class MaxThread extends Thread {
     int arr[];
     int max;
 
-    // Constructor
     MaxThread(int arr[]) {
         this.arr = arr;
     }
 
-    // Thread task
     public void run() {
 
         max = arr[0];
@@ -205,11 +171,8 @@ class MaxThread extends Thread {
                 max = arr[i];
             }
         }
-
-        System.out.println("Maximum Element = " + max);
     }
 
-    // Getter Method
     int getMax() {
         return max;
     }
@@ -220,71 +183,58 @@ class AvgThread extends Thread {
     int arr[];
     double avg;
 
-    // Constructor
     AvgThread(int arr[]) {
         this.arr = arr;
     }
 
-    // Thread task
     public void run() {
 
         int sum = 0;
 
         for (int i = 0; i < arr.length; i++) {
-
-            sum += arr[i];
+            sum = sum + arr[i];
         }
 
         avg = (double) sum / arr.length;
-
-        System.out.println("Average = " + avg);
     }
 
-    // Getter Method
     double getAvg() {
         return avg;
     }
 }
 
-public class ArrayOperation {
+public class Main {
 
-    public static void main(String[] args)
-            throws InterruptedException {
+    public static void main(String args[]) throws Exception {
 
         Scanner sc = new Scanner(System.in);
 
-        // Input array size
         System.out.print("Enter size of array: ");
         int n = sc.nextInt();
 
         int arr[] = new int[n];
 
-        // Input array elements
         System.out.println("Enter array elements:");
 
         for (int i = 0; i < n; i++) {
-
             arr[i] = sc.nextInt();
         }
 
-        // Create threads
         MaxThread t1 = new MaxThread(arr);
-
         AvgThread t2 = new AvgThread(arr);
 
-        // Start threads
         t1.start();
         t2.start();
 
-        // Wait for threads to complete
         t1.join();
         t2.join();
 
-        // Parent thread calculation
         double result = t1.getMax() / t2.getAvg();
 
-        System.out.println("(Max / Average) = " + result);
+        System.out.println("Maximum = " + t1.getMax());
 
-        sc.close();
+        System.out.println("Average = " + t2.getAvg());
+
+        System.out.println("Result = " + result);
     }
 }
