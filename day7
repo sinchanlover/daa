@@ -1,0 +1,92 @@
+#include <stdio.h>
+
+#define V 4
+
+// Function to print solution
+void printSolution(int color[])
+{
+    printf("Solution Exists:\n");
+
+    for (int i = 0; i < V; i++)
+    {
+        printf("Node %d -> Color %d\n", i + 1, color[i]);
+    }
+}
+
+// Check if current color assignment is safe
+int isSafe(int v, int graph[V][V], int color[], int c)
+{
+    for (int i = 0; i < V; i++)
+    {
+        // If connected and same color
+        if (graph[v][i] && color[i] == c)
+            return 0;
+    }
+
+    return 1;
+}
+
+// Recursive function for graph coloring
+int graphColoringUtil(int graph[V][V], int m, int color[], int v)
+{
+    // Base case: all vertices are colored
+    if (v == V)
+        return 1;
+
+    // Try different colors
+    for (int c = 1; c <= m; c++)
+    {
+        // Check if assigning color c is safe
+        if (isSafe(v, graph, color, c))
+        {
+            color[v] = c;
+
+            // Recur for next vertex
+            if (graphColoringUtil(graph, m, color, v + 1))
+                return 1;
+
+            // Backtrack
+            color[v] = 0;
+        }
+    }
+
+    // If no color can be assigned
+    return 0;
+}
+
+// Main graph coloring function
+int graphColoring(int graph[V][V], int m)
+{
+    int color[V];
+
+    // Initialize all colors as 0
+    for (int i = 0; i < V; i++)
+        color[i] = 0;
+
+    // Call recursive function
+    if (graphColoringUtil(graph, m, color, 0) == 0)
+    {
+        printf("Solution does not exist\n");
+        return 0;
+    }
+
+    printSolution(color);
+    return 1;
+}
+
+// Driver code
+int main()
+{
+    int graph[V][V] = {
+        {0, 1, 1, 1},
+        {1, 0, 1, 0},
+        {1, 1, 0, 1},
+        {1, 0, 1, 0}
+    };
+
+    int m = 3; // Number of colors
+
+    graphColoring(graph, m);
+
+    return 0;
+}
