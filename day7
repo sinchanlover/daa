@@ -90,3 +90,110 @@ int main()
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+#include<stdio.h>
+
+#define n 4
+
+int board[n][n];
+int solutioncount = 0;
+
+void printBoard()
+{
+    printf("\nSolution %d:\n", ++solutioncount);
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            printf("%d ", board[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int isSafe(int row, int col)
+{
+    int i, j;
+
+    // Check left side of row
+    for(i = 0; i < col; i++)
+    {
+        if(board[row][i])
+            return 0;
+    }
+
+    // Check upper-left diagonal
+    for(i = row, j = col; i >= 0 && j >= 0; i--, j--)
+    {
+        if(board[i][j])
+            return 0;
+    }
+
+    // Check lower-left diagonal
+    for(i = row, j = col; i < n && j >= 0; i++, j--)
+    {
+        if(board[i][j])
+            return 0;
+    }
+
+    return 1;
+}
+
+void solveNQueens(int col)
+{
+    // All queens placed
+    if(col == n)
+    {
+        printBoard();
+        return;
+    }
+
+    // Try every row
+    for(int i = 0; i < n; i++)
+    {
+        if(isSafe(i, col))
+        {
+            board[i][col] = 1;
+
+            solveNQueens(col + 1);
+
+            // Backtracking
+            board[i][col] = 0;
+        }
+    }
+}
+
+int main()
+{
+    // Initialize board
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            board[i][j] = 0;
+        }
+    }
+
+    solveNQueens(0);
+
+    if(solutioncount == 0)
+    {
+        printf("No solution exists\n");
+    }
+    else
+    {
+        printf("\nTotal Solutions = %d\n", solutioncount);
+    }
+
+    return 0;
+}
